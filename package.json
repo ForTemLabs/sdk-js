@@ -1,0 +1,69 @@
+{
+    "name": "@fortemlabs/sdk-js",
+    "version": "0.0.1",
+    "description": "ForTem SDK for JavaScript/TypeScript — NFT marketplace API client",
+    "publishConfig": {
+        "access": "public"
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.mts",
+                "default": "./dist/index.mjs"
+            },
+            "require": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            }
+        }
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit",
+        "prepublishOnly": "pnpm run build"
+    },
+    "keywords": [
+        "fortem",
+        "sdk",
+        "nft",
+        "marketplace",
+        "sui",
+        "blockchain"
+    ],
+    "author": {
+        "name": "Dillon Jang",
+        "email": "dillon@sevenlinelabs.com",
+        "url": "https://fortem.gg"
+    },
+    "license": "BUSL-1.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ForTemLabs/sdk-js.git"
+    },
+    "devDependencies": {
+        "tsup": "^8.3.0",
+        "typescript": "^5.7.0",
+        "vitest": "^2.1.0",
+        "@types/node": "^22.0.0"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
+    }
+}
