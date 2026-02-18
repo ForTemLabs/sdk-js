@@ -12,3 +12,6 @@ export const NETWORK_CONFIGS: Record<FortemNetwork, NetworkConfig> = {
 };
 
 export const DEFAULT_NETWORK: FortemNetwork = "mainnet";
+
+/** HTTP status code indicating token expired/consumed */
+export const TOKEN_EXPIRED_STATUS = 403;

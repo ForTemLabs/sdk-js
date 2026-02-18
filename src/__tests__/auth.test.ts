@@ -1,22 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { createFortemClient } from "../index";
 import { FortemAuthError, FortemError } from "../errors";
+import { createMockFetch } from "./helpers";
 
-const TEST_API_KEY = "developer_m4c1aj741e_b4b8446a0bff521";
+const TEST_API_KEY = "developer_test_dummy_key";
 const TEST_NETWORK = "testnet" as const;
-
-function createMockFetch(responses: Array<{ status: number; body: unknown }>) {
-  let callIndex = 0;
-  return vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => {
-    const res = responses[callIndex++];
-    return {
-      ok: res.status >= 200 && res.status < 300,
-      status: res.status,
-      json: async () => res.body,
-      headers: new Headers(),
-    } as Response;
-  });
-}
 
 describe("FortemAuth", () => {
   describe("getNonce", () => {

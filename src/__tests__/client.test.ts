@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { createFortemClient, FortemClient } from "../index";
 
-const MAINNET_API_KEY = "developer_m2uibue9e2_2b2de7c0e08c652";
-const TESTNET_API_KEY = "developer_m4c1aj741e_b4b8446a0bff521";
+const MAINNET_API_KEY = "developer_mainnet_dummy_key";
+const TESTNET_API_KEY = "developer_testnet_dummy_key";
 const TEST_NETWORK = "testnet" as const;
 
 describe("FortemClient", () => {
@@ -32,5 +32,20 @@ describe("FortemClient", () => {
   it("should have auth sub-module", () => {
     const client = createFortemClient({ apiKey: TESTNET_API_KEY, network: TEST_NETWORK });
     expect(client.auth).toBeDefined();
+  });
+
+  it("should have users sub-module", () => {
+    const client = createFortemClient({ apiKey: TESTNET_API_KEY, network: TEST_NETWORK });
+    expect(client.users).toBeDefined();
+  });
+
+  it("should have collections sub-module", () => {
+    const client = createFortemClient({ apiKey: TESTNET_API_KEY, network: TEST_NETWORK });
+    expect(client.collections).toBeDefined();
+  });
+
+  it("should have items sub-module", () => {
+    const client = createFortemClient({ apiKey: TESTNET_API_KEY, network: TEST_NETWORK });
+    expect(client.items).toBeDefined();
   });
 });

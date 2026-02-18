@@ -1,4 +1,5 @@
-import { FortemError, FortemAuthError } from "./errors";
+import { FortemError, FortemAuthError, FortemTokenExpiredError } from "./errors";
+import { TOKEN_EXPIRED_STATUS } from "./constants";
 import type { FortemResponse } from "./types";
 
 export type Fetch = typeof globalThis.fetch;
@@ -14,7 +15,7 @@ export function createFetchWithApiKey(
     const headers = new Headers(init?.headers);
     headers.set("x-api-key", apiKey);
 
-    if (!headers.has("Content-Type")) {
+    if (!headers.has("Content-Type") && !(init?.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
     }
 
@@ -36,6 +37,10 @@ export async function parseResponse<T>(
 
     if (response.status === 401) {
       throw new FortemAuthError(message);
+    }
+
+    if (response.status === TOKEN_EXPIRED_STATUS) {
+      throw new FortemTokenExpiredError(message);
     }
 
     throw new FortemError(message, response.status, body.code as string);

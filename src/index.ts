@@ -9,7 +9,10 @@ export function createFortemClient(options: FortemClientOptions): FortemClient {
 // Re-exports
 export { FortemClient } from "./client";
 export { FortemAuth } from "./auth";
-export { FortemError, FortemAuthError } from "./errors";
+export { FortemUsers } from "./users";
+export { FortemCollections } from "./collections";
+export { FortemItems } from "./items";
+export { FortemError, FortemAuthError, FortemTokenExpiredError } from "./errors";
 export type {
     FortemClientOptions,
     FortemNetwork,
@@ -17,4 +20,14 @@ export type {
     NonceResponse,
     AccessTokenResponse,
     NetworkConfig,
+    UserResponse,
+    Collection,
+    CollectionLink,
+    CreateCollectionParams,
+    Item,
+    ItemAttribute,
+    ItemOwner,
+    ItemStatus,
+    CreateItemParams,
+    ImageUploadResponse,
 } from "./types";
