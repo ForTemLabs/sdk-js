@@ -6,51 +6,60 @@ ForTem SDK for JavaScript/TypeScript — NFT marketplace API client for the Sui 
 
 ```bash
 npm install @fortemlabs/sdk-js
-# or
+```
+
+<details>
+<summary>pnpm / yarn</summary>
+
+```bash
 pnpm install @fortemlabs/sdk-js
 # or
 yarn add @fortemlabs/sdk-js
 ```
+
+</details>
 
 ## Quick Start
 
 ```typescript
 import { createFortemClient } from '@fortemlabs/sdk-js'
 
-const fortem = createFortemClient({
-  apiKey: 'your-api-key',
-  network: 'mainnet', // 'testnet' | 'mainnet' (default: 'mainnet')
-})
+// 1. Create client
+const fortem = createFortemClient({ apiKey: 'your-api-key' })
 
-// 1. Authenticate
+// 2. Authenticate
 const { data: { nonce } } = await fortem.auth.getNonce()
-const { data: { accessToken } } = await fortem.auth.getAccessToken(nonce)
+await fortem.auth.getAccessToken(nonce)
 
-// 2. Verify a user
-const { data: user } = await fortem.users.verify('0x...')
-
-// 3. List collections
+// 3. Use the API
 const { data: collections } = await fortem.collections.list()
-
-// 4. Create a collection (consumes token)
-const { data: collection } = await fortem.collections.create({
-  name: 'My Collection',
-  description: 'A new NFT collection',
-})
-
-// 5. Create an item (consumes token)
-const { data: item } = await fortem.items.create(collection.id, {
-  name: 'My Item',
-  quantity: 1,
-  redeemCode: 'REDEEM-001',
-  description: 'A new NFT item',
-  recipientAddress: '0x...',
-})
-
-// 6. Upload an item image
-const imageFile = new File([buffer], 'image.png', { type: 'image/png' })
-const { data: { itemImage } } = await fortem.items.uploadImage(collection.id, imageFile)
 ```
+
+> All authenticated requests (`users`, `collections`, `items`) automatically inject the Bearer token. You only need to authenticate once.
+
+## Overview
+
+```
+fortem
+├── auth            Authentication & token management
+├── users           User verification
+├── collections     Collection CRUD
+└── items           Item CRUD & image upload
+```
+
+| Module | Method | Description |
+|--------|--------|-------------|
+| **auth** | `getNonce()` | Get authentication nonce |
+| | `getAccessToken(nonce)` | Exchange nonce for access token |
+| | `getValidToken()` | Get valid token (auto-refresh) |
+| | `getToken()` | Get cached token or `null` |
+| | `clearToken()` | Clear cached token |
+| **users** | `verify(walletAddress)` | Check if wallet is registered |
+| **collections** | `list()` | List all collections |
+| | `create(params)` | Create a collection |
+| **items** | `get(collectionId, code)` | Get item by redeem code |
+| | `create(collectionId, params)` | Create an item |
+| | `uploadImage(collectionId, file)` | Upload item image |
 
 ## Rate Limits
 
@@ -61,83 +70,42 @@ Create operations are subject to daily rate limits, resetting at 00:00 UTC.
 | Collection | 100 requests/day |
 | Item | 1,000 requests/day |
 
-## API Reference
+## Guides
 
-### `createFortemClient(options)`
-
-Creates a new ForTem client instance.
-
-| Option | Type | Required | Default | Description |
-|--------|------|----------|---------|-------------|
-| `apiKey` | `string` | Yes | - | Your ForTem developer API key |
-| `network` | `'testnet' \| 'mainnet'` | No | `'mainnet'` | Network environment |
-| `fetch` | `typeof fetch` | No | `globalThis.fetch` | Custom fetch function |
-
----
-
-### Auth (`client.auth`)
-
-#### `getNonce()`
-
-Requests a nonce from the ForTem API for authentication.
+### Authentication
 
 ```typescript
+// Step 1: Get a nonce
 const { data: { nonce } } = await fortem.auth.getNonce()
-```
 
-#### `getAccessToken(nonce)`
-
-Exchanges a nonce for an access token. The token is cached internally (5 min TTL).
-
-```typescript
+// Step 2: Exchange for access token (cached for 5 min)
 const { data: { accessToken } } = await fortem.auth.getAccessToken(nonce)
 ```
 
-#### `getValidToken()`
+After authenticating, all API calls automatically include the token. No manual header management needed.
 
-Returns a valid access token, auto-refreshing if the cached token has expired.
+**Token lifecycle:**
+- Tokens are cached internally with a 5 min TTL
+- `getValidToken()` auto-refreshes expired tokens
+- Minting operations (`collections.create`, `items.create`) consume the token — the SDK clears it automatically and fetches a new one on the next request
+- On 403 responses, the SDK retries once with a fresh token
 
-```typescript
-const token = await fortem.auth.getValidToken()
-```
-
-#### `getToken()`
-
-Returns the cached access token, or `null` if expired or not available.
-
-#### `clearToken()`
-
-Clears the cached access token.
-
----
-
-### Users (`client.users`)
-
-#### `verify(walletAddress)`
-
-Verify if a wallet address is a registered ForTem user.
+### Users
 
 ```typescript
-const { data: user } = await fortem.users.verify('0x...')
-// user: { isUser, nickname, profileImage, walletAddress }
+const { data: user } = await fortem.users.verify('0xWalletAddress')
+// { isUser, nickname, profileImage, walletAddress }
 ```
 
----
+### Collections
 
-### Collections (`client.collections`)
-
-#### `list()`
-
-List all collections.
+**List all collections:**
 
 ```typescript
 const { data: collections } = await fortem.collections.list()
-// collections: Collection[]
 ```
 
-#### `create(params)`
-
-Create a new collection. This is a minting operation that consumes the current access token.
+**Create a collection:**
 
 ```typescript
 const { data: collection } = await fortem.collections.create({
@@ -147,39 +115,39 @@ const { data: collection } = await fortem.collections.create({
 })
 ```
 
+<details>
+<summary>CreateCollectionParams</summary>
+
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | `string` | Yes | Collection name |
 | `description` | `string` | Yes | Collection description |
 | `link` | `{ website?: string }` | No | Collection links |
 
----
+</details>
 
-### Items (`client.items`)
+### Items
 
-#### `get(collectionId, code)`
-
-Get an item by its redeem code.
+**Get an item:**
 
 ```typescript
-const { data: item } = await fortem.items.get(42, 'REDEEM-001')
+const { data: item } = await fortem.items.get(collectionId, 'REDEEM-001')
 ```
 
-#### `create(collectionId, params)`
-
-Create a new item in a collection. This is a minting operation that consumes the current access token.
+**Create an item:**
 
 ```typescript
-const { data: item } = await fortem.items.create(42, {
+const { data: item } = await fortem.items.create(collectionId, {
   name: 'My Item',
   quantity: 1,
   redeemCode: 'REDEEM-001',
   description: 'A new NFT item',
   recipientAddress: '0x...',
-  attributes: [{ name: 'Rarity', value: 'Legendary' }], // optional
-  redeemUrl: 'https://example.com/redeem',               // optional
 })
 ```
+
+<details>
+<summary>CreateItemParams</summary>
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -192,27 +160,19 @@ const { data: item } = await fortem.items.create(42, {
 | `attributes` | `{ name, value }[]` | No | Item attributes |
 | `redeemUrl` | `string` | No | Redeem URL |
 
-#### `uploadImage(collectionId, file)`
+</details>
 
-Upload an image for an item. Accepts `Blob` or `File`.
+**Upload an image:**
 
 ```typescript
-const { data: { itemImage } } = await fortem.items.uploadImage(42, imageFile)
-// itemImage: uploaded image URL
+const imageFile = new File([buffer], 'image.png', { type: 'image/png' })
+const { data: { itemImage } } = await fortem.items.uploadImage(collectionId, imageFile)
 ```
-
----
 
 ### Error Handling
 
-The SDK throws typed errors for different failure scenarios:
-
 ```typescript
-import {
-  FortemError,
-  FortemAuthError,
-  FortemTokenExpiredError,
-} from '@fortemlabs/sdk-js'
+import { FortemError, FortemAuthError, FortemTokenExpiredError } from '@fortemlabs/sdk-js'
 
 try {
   await fortem.collections.list()
@@ -222,30 +182,25 @@ try {
   } else if (error instanceof FortemTokenExpiredError) {
     // 403: Access token expired or consumed
   } else if (error instanceof FortemError) {
-    // Other API errors
-    console.error(error.message, error.statusCode, error.code)
+    // Other API errors (error.message, error.statusCode, error.code)
   }
 }
 ```
 
-| Error Class | Status | Description |
-|------------|--------|-------------|
-| `FortemAuthError` | 401 | Invalid API key or authentication failed |
-| `FortemTokenExpiredError` | 403 | Access token expired or consumed |
+| Error Class | Status | When |
+|------------|--------|------|
+| `FortemAuthError` | 401 | Invalid API key |
+| `FortemTokenExpiredError` | 403 | Token expired or consumed |
 | `FortemError` | Other | General API error |
 
-### Token Management
-
-Minting operations (`collections.create`, `items.create`) consume the access token. The SDK handles this automatically:
-
-1. **Proactive invalidation**: After a successful minting operation, the cached token is cleared automatically.
-2. **Auto-retry on 403**: If a request receives a 403 response, the SDK clears the token, fetches a new one, and retries once.
-
-You can also use `getValidToken()` which auto-refreshes expired tokens:
+## Configuration
 
 ```typescript
-// Always returns a valid token - refreshes automatically if needed
-const token = await fortem.auth.getValidToken()
+const fortem = createFortemClient({
+  apiKey: 'your-api-key',           // required
+  network: 'testnet',               // 'mainnet' (default) | 'testnet'
+  fetch: customFetchFn,             // optional custom fetch
+})
 ```
 
 ## License
