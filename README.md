@@ -6,18 +6,11 @@ ForTem SDK for JavaScript/TypeScript — NFT marketplace API client for the Sui 
 
 ```bash
 npm install @fortemlabs/sdk-js
-```
-
-<details>
-<summary>pnpm / yarn</summary>
-
-```bash
+# or
 pnpm install @fortemlabs/sdk-js
 # or
 yarn add @fortemlabs/sdk-js
 ```
-
-</details>
 
 ## Quick Start
 
