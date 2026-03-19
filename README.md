@@ -50,7 +50,8 @@ fortem
 | **users** | `verify(walletAddress)` | Check if wallet is registered |
 | **collections** | `list()` | List all collections |
 | | `create(params)` | Create a collection |
-| **items** | `get(collectionId, code)` | Get item by redeem code |
+| **items** | `list(collectionId)` | List all items in a collection |
+| | `get(collectionId, code)` | Get item by redeem code |
 | | `create(collectionId, params)` | Create an item |
 | | `uploadImage(collectionId, file)` | Upload item image |
 
@@ -120,6 +121,12 @@ const { data: collection } = await fortem.collections.create({
 </details>
 
 ### Items
+
+**List all items in a collection:**
+
+```typescript
+const { data: items } = await fortem.items.list(collectionId)
+```
 
 **Get an item:**
 
