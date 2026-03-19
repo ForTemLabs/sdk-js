@@ -1,6 +1,6 @@
 {
     "name": "@fortemlabs/sdk-js",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "ForTem SDK for JavaScript/TypeScript — NFT marketplace API client",
     "publishConfig": {
         "access": "public"
