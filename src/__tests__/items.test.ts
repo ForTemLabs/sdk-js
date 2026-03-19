@@ -22,6 +22,51 @@ const sampleItem = {
 };
 
 describe("FortemItems", () => {
+  describe("list", () => {
+    it("should return Item[] on success", async () => {
+      const mockFetch = createMockFetch([
+        { status: 200, body: { statusCode: 200, data: { nonce: "nonce-1" } } },
+        { status: 200, body: { statusCode: 200, data: { accessToken: "token-1" } } },
+        { status: 200, body: { statusCode: 200, data: [sampleItem] } },
+      ]);
+      const client = createFortemClient({ apiKey: TEST_API_KEY, network: TEST_NETWORK, fetch: mockFetch });
+
+      const result = await client.items.list(COLLECTION_ID);
+
+      expect(result.data).toEqual([sampleItem]);
+    });
+
+    it("should call correct endpoint with GET method", async () => {
+      const mockFetch = createMockFetch([
+        { status: 200, body: { statusCode: 200, data: { nonce: "nonce-1" } } },
+        { status: 200, body: { statusCode: 200, data: { accessToken: "token-1" } } },
+        { status: 200, body: { statusCode: 200, data: [] } },
+      ]);
+      const client = createFortemClient({ apiKey: TEST_API_KEY, network: TEST_NETWORK, fetch: mockFetch });
+
+      await client.items.list(COLLECTION_ID);
+
+      const [url, init] = mockFetch.mock.calls[2];
+      expect(url).toBe(`https://testnet-api.fortem.gg/api/v1/developers/collections/${COLLECTION_ID}/items`);
+      expect(init?.method).toBe("GET");
+    });
+
+    it("should include Authorization Bearer header", async () => {
+      const mockFetch = createMockFetch([
+        { status: 200, body: { statusCode: 200, data: { nonce: "nonce-1" } } },
+        { status: 200, body: { statusCode: 200, data: { accessToken: "list-token" } } },
+        { status: 200, body: { statusCode: 200, data: [] } },
+      ]);
+      const client = createFortemClient({ apiKey: TEST_API_KEY, network: TEST_NETWORK, fetch: mockFetch });
+
+      await client.items.list(COLLECTION_ID);
+
+      const [, init] = mockFetch.mock.calls[2];
+      const headers = new Headers(init?.headers);
+      expect(headers.get("Authorization")).toBe("Bearer list-token");
+    });
+  });
+
   describe("get", () => {
     it("should return Item on success", async () => {
       const mockFetch = createMockFetch([

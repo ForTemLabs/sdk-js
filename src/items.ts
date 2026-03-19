@@ -15,6 +15,19 @@ export class FortemItems {
   ) {}
 
   /**
+   * List all items in a collection.
+   *
+   * @param collectionId - The collection ID
+   */
+  async list(collectionId: number): Promise<FortemResponse<Item[]>> {
+    const response = await this._fetch(
+      `${this._apiBaseUrl}/api/v1/developers/collections/${collectionId}/items`,
+      { method: "GET" }
+    );
+    return parseResponse<Item[]>(response);
+  }
+
+  /**
    * Get an item by its redeem code.
    *
    * @param collectionId - The collection ID
